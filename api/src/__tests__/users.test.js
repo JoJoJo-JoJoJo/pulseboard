@@ -63,3 +63,113 @@ describe("GET /api/users", () => {
     });
   });
 });
+
+//TODO: Cases:
+// Allows LEAD to change a user's role - implemented + tested
+// Prevents MEMBER from changing a user's role - implemented + tested
+// Prevents user with invalid id from making changes - implemented but not tested
+// Prevents last remaining lead from demoting themselves - implemented + tested
+
+describe("PATCH /api/users/:id/role", () => {
+  it("Allows a LEAD to change another user's role", async () => {
+    //? Create both users
+    const lead = await User.create({
+      email: "user@example.com",
+      displayName: "User Name",
+      passwordHash: "super-secret-password-hash",
+      role: "LEAD",
+    });
+    const member = await User.create({
+      email: "user2@example.com",
+      displayName: "User Name 2",
+      passwordHash: "super-secret-password-hash-2",
+      role: "MEMBER",
+    });
+
+    //? Sign verification token for LEAD user
+    const token = jwt.sign(
+      {
+        sub: lead._id.toString(),
+        email: lead.email,
+        role: lead.role,
+      },
+      process.env.JWT_SECRET,
+    );
+
+    //? Make request to server
+    const res = await request(app)
+      .patch(`/api/users/${member.id}/role`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ role: "LEAD" })
+      .expect(200);
+
+    expect(res.body.user.role).toBe("LEAD");
+  });
+
+  it("Returns a 403 when a MEMBER tries to change a user's role", async () => {
+    //? Create both users
+    const member1 = await User.create({
+      email: "user@example.com",
+      displayName: "User Name",
+      passwordHash: "super-secret-password-hash",
+      role: "MEMBER",
+      save: jest.fn().mockResolvedValue(true)
+    });
+    const member2 = await User.create({
+      email: "user2@example.com",
+      displayName: "User Name 2",
+      passwordHash: "super-secret-password-hash-2",
+      role: "MEMBER",
+      save: jest.fn().mockResolvedValue(true)
+    });
+
+    //? Sign verification token for member1
+    const token = jwt.sign(
+      {
+        sub: member1._id.toString(),
+        email: member1.email,
+        role: member1.role,
+      },
+      process.env.JWT_SECRET,
+    );
+
+    //? Make request to server
+    const res = await request(app)
+      .patch(`/api/users/${member2.id}/role`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ role: "LEAD" })
+      .expect(403);
+  });
+
+  it("Prevents the last remaining LEAD from demoting themselves", async () => {
+    //? Create both users
+    const lead = await User.create({
+      email: "user@example.com",
+      displayName: "User Name",
+      passwordHash: "super-secret-password-hash",
+      role: "LEAD",
+      save: jest.fn().mockResolvedValue(true)
+    });
+
+    //? Sign verification token for member1
+    const token = jwt.sign(
+      {
+        sub: lead._id.toString(),
+        email: lead.email,
+        role: lead.role,
+      },
+      process.env.JWT_SECRET,
+    );
+
+    //? Make request to server
+    const res = await request(app)
+      .patch(`/api/users/${lead.id}/role`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ role: "MEMBER" })
+      .expect(400);
+
+    //? Check that lead still has LEAD role
+    const leadUpdated = await User.findById(lead.id);
+    expect(leadUpdated.role).toBe("LEAD");
+  });
+});

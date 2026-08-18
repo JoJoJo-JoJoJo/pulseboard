@@ -36,7 +36,7 @@ router.patch("/:id/role", requireAuth, checkRole("LEAD"), async (req, res) => {
   }
 
   //? Catch invalid user IDs
-  const userInQuestion = User.findById(req.params.id);
+  const userInQuestion = await User.findById(req.params.id);
 
   if (!userInQuestion) {
     return res.status(404).json({
@@ -52,7 +52,7 @@ router.patch("/:id/role", requireAuth, checkRole("LEAD"), async (req, res) => {
   ) {
     const leadsCount = await User.find({ role: "LEAD" }).countDocuments();
 
-    if (leadsCount === 1) {
+    if (leadsCount <= 1) {
       return res.status(400).json({
         error: "Invalid action - cannot demote the last remaining LEAD."
       });
