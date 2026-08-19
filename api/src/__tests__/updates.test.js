@@ -900,14 +900,9 @@ describe("POST /api/updates/:id/reactions - race test", () => {
 
     //? Promise.all() sends the 2nd request slightly after the 1st so can simulate e.g. a double click
     const [res1, res2] = await Promise.all([
-      await request(app).post(`/api/updates/${updateId}/reactions`).set("Authorization", `Bearer ${token}`).send(payload),
-      await request(app).post(`/api/updates/${updateId}/reactions`).set("Authorization", `Bearer ${token}`).send(payload)
+      request(app).post(`/api/updates/${updateId}/reactions`).set("Authorization", `Bearer ${token}`).send(payload),
+      request(app).post(`/api/updates/${updateId}/reactions`).set("Authorization", `Bearer ${token}`).send(payload)
     ]);
-
-    console.log(res1.status);
-    console.log(res1.body);
-    console.log(res2.status);
-    console.log(res2.body);
 
     const testUpdate = await Update.findById(updateId).lean();
     if (!testUpdate) {
