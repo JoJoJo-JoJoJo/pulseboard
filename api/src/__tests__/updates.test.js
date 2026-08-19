@@ -222,7 +222,7 @@ describe("GET /api/updates", () => {
     expect(res.body.updates[0].text).toBe("First update");
   });
 
-  it("sorts by reactions before applying pagination", async () => {
+  it("sorts by reactions before applying pagination #1", async () => {
     const first = await request(app)
       .post("/api/updates")
       .set("Authorization", `Bearer ${token}`)
@@ -290,7 +290,7 @@ describe("GET /api/updates", () => {
     expect(page3.body.updates[0].text).toBe("No reactions");
     expect(page3.body.pagination.hasNextPage).toBe(false);
   });
-  it("sorts by reactions before applying pagination", async () => {
+  it("sorts by reactions before applying pagination #2", async () => {
     const mostReacted = await request(app)
       .post("/api/updates")
       .set("Authorization", `Bearer ${token}`)
