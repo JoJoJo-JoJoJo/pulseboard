@@ -53,7 +53,6 @@ export function listUpdates({
   page = 1,
   limit = 10,
 } = {}) {
-
   const params = new URLSearchParams();
 
   if (author) params.set("author", author);

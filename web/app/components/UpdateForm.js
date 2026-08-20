@@ -142,13 +142,16 @@ export default function UpdateForm({ auth, onPosted }) {
       <textarea
         placeholder="What's your status today?"
         value={text}
-        onKeyDown={(e)=> {
-          if(e.key === "Enter" && (e.metaKey || e.ctrlKey) && !isPosting){
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !isPosting) {
             e.preventDefault();
-            e.target.form.requestSubmit()
-          }}}
-        onChange={(e) => {setText(e.target.value)
-                setCharCount(e.target.value.length)}}
+            e.target.form.requestSubmit();
+          }
+        }}
+        onChange={(e) => {
+          setText(e.target.value);
+          setCharCount(e.target.value.length);
+        }}
         maxLength={1000}
         required
         disabled={isPosting}

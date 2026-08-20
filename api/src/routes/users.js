@@ -31,7 +31,7 @@ router.patch("/:id/role", requireAuth, checkRole("LEAD"), async (req, res) => {
   //? Catch invalid roles
   if (!["LEAD", "MEMBER"].includes(role)) {
     return res.status(400).json({
-      error: "Invalid role given - new role must be one of LEAD/MEMBER."
+      error: "Invalid role given - new role must be one of LEAD/MEMBER.",
     });
   }
 
@@ -40,21 +40,21 @@ router.patch("/:id/role", requireAuth, checkRole("LEAD"), async (req, res) => {
 
   if (!userInQuestion) {
     return res.status(404).json({
-      error: "Invalid user id given - user not found."
+      error: "Invalid user id given - user not found.",
     });
   }
 
   //? Prevent last remaining lead from demoting themselves
   if (
-    req.user.id === userInQuestion.id
-    && userInQuestion.role === "LEAD"
-    && role === "MEMBER"
+    req.user.id === userInQuestion.id &&
+    userInQuestion.role === "LEAD" &&
+    role === "MEMBER"
   ) {
     const leadsCount = await User.find({ role: "LEAD" }).countDocuments();
 
     if (leadsCount <= 1) {
       return res.status(400).json({
-        error: "Invalid action - cannot demote the last remaining LEAD."
+        error: "Invalid action - cannot demote the last remaining LEAD.",
       });
     }
   }
@@ -63,7 +63,7 @@ router.patch("/:id/role", requireAuth, checkRole("LEAD"), async (req, res) => {
   await userInQuestion.save();
 
   return res.status(200).json({
-    user: userInQuestion
+    user: userInQuestion,
   });
 });
 

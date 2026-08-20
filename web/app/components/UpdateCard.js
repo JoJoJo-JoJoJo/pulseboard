@@ -201,15 +201,15 @@ export default function UpdateCard({ update, auth, onUpdated, onDeleted }) {
     const authorName = update.author?.displayName;
 
     if (!authorName) {
-      return "U" // U is for Unknown
+      return "U"; // U is for Unknown
     }
 
     const initials = authorName
-    .split(" ")
-    .map(word => word.slice(0, 1))
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+      .split(" ")
+      .map((word) => word.slice(0, 1))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
 
     return initials;
   }
@@ -247,9 +247,7 @@ export default function UpdateCard({ update, auth, onUpdated, onDeleted }) {
               )}
             </div>
           </div>
-          <div className="initials-badge">
-            {getAuthorInitials(update)}
-          </div>
+          <div className="initials-badge">{getAuthorInitials(update)}</div>
         </div>
         {isEditing ? (
           <div className="edit-field">
@@ -338,7 +336,8 @@ export default function UpdateCard({ update, auth, onUpdated, onDeleted }) {
                 Edit
               </button>
             )}
-              {(auth?.user?.role === "LEAD" || auth?.user?._id === update.author?._id) && (
+            {(auth?.user?.role === "LEAD" ||
+              auth?.user?._id === update.author?._id) && (
               <button
                 className="delete-btn"
                 type="button"

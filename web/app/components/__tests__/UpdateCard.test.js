@@ -95,13 +95,31 @@ describe("UpdateCard", () => {
   });
 
   it("renders the initials badge for a one word author name", () => {
-    render(<UpdateCard update={ {...update, author: { ...update.author, displayName: "Amina"} }} auth={null} onUpdated={() => {}}/>);
+    render(
+      <UpdateCard
+        update={{
+          ...update,
+          author: { ...update.author, displayName: "Amina" },
+        }}
+        auth={null}
+        onUpdated={() => {}}
+      />,
+    );
 
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
   it("renders the initials badge for a multi-word author name", () => {
-    render(<UpdateCard update={ {...update, author: { ...update.author, displayName: "Amina Fatima Yusuf"} }} auth={null} onUpdated={() => {}}/>);
+    render(
+      <UpdateCard
+        update={{
+          ...update,
+          author: { ...update.author, displayName: "Amina Fatima Yusuf" },
+        }}
+        auth={null}
+        onUpdated={() => {}}
+      />,
+    );
 
     expect(screen.getByText("AF")).toBeInTheDocument();
   });
