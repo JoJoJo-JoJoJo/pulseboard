@@ -1299,8 +1299,6 @@ describe("PATCH /api/updates/:id", () => {
   });
 });
 
-});
-
 describe("PATCH /api/updates/:id/pin", () => {
   it("returns 403 when a MEMBER tries to pin an update", async () => {
     const createRes = await request(app)
@@ -1347,7 +1345,7 @@ describe("PATCH /api/updates/:id/pin", () => {
     const memberCreateRes = await request(app)
       .post("/api/updates/")
       .set("Authorization", `Bearer ${member.token}`)
-      .send({text: "Protected Update", status: "on-track"});
+      .send({ text: "Protected Update", status: "on-track" });
 
     const updateId = memberCreateRes.body.update._id;
 
@@ -1363,24 +1361,22 @@ describe("PATCH /api/updates/:id/pin", () => {
     expect(resPin.body.update._id).toBe(updateId);
     expect(resPin.body.update.pinned).toBe(true);
     expect(resPin.body.update.author._id).toBe(member.user._id);
-    
+
     // Lead unpinning an update
     const resUnpin = await request(app)
-    .patch(`/api/updates/${updateId}/pin`)
-    .set("Authorization", `Bearer ${leadToken}`)
-    .send({
-      pinned: false,
-    });
-    
+      .patch(`/api/updates/${updateId}/pin`)
+      .set("Authorization", `Bearer ${leadToken}`)
+      .send({
+        pinned: false,
+      });
+
     expect(resUnpin.status).toBe(200);
     expect(resUnpin.body.update._id).toBe(updateId);
     expect(resUnpin.body.update.pinned).toBe(false);
     expect(resUnpin.body.update.author._id).toBe(member.user._id);
-
-
   });
 
-  it("tests the pinned update was always on the top", async() => {
+  it("tests the pinned update was always on the top", async () => {
     await User.findOneAndUpdate(
       { email: "author@example.com" },
       { role: "LEAD" },
@@ -1402,7 +1398,7 @@ describe("PATCH /api/updates/:id/pin", () => {
       .post("/api/updates/")
       .set("Authorization", `Bearer ${member.token}`)
       .send({ text: "First Update", status: "on-track" });
-      
+
     const firstUpdateId = memberCreateRes1.body.update._id;
 
     const memberCreateRes2 = await request(app)
@@ -1430,8 +1426,8 @@ describe("PATCH /api/updates/:id/pin", () => {
 
   it("returns 404 when pinning an non-existing update", async () => {
     await User.findOneAndUpdate(
-      {email: "author@example.com"},
-      {role: "LEAD"},
+      { email: "author@example.com" },
+      { role: "LEAD" },
     );
 
     const loginRes = await request(app).post("/api/auth/login").send({
@@ -1440,7 +1436,7 @@ describe("PATCH /api/updates/:id/pin", () => {
     });
 
     const token = loginRes.body.token;
-    
+
     const createRes = await request(app)
       .post("/api/updates/")
       .set("Authorization", `Bearer ${token}`)
@@ -1460,5 +1456,5 @@ describe("PATCH /api/updates/:id/pin", () => {
       });
 
     expect(pinRes.status).toBe(404);
-  })
+  });
 });

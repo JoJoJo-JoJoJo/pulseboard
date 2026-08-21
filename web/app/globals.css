@@ -711,12 +711,12 @@ section {
 }
 
 .pin-btn.is-pinned:hover:not(:disabled) {
-  background-color: #fde68a; 
+  background-color: #fde68a;
   border-color: #fbbf24;
 }
 
 .pin-btn:disabled {
   cursor: default;
-  border-color: transparent; 
+  border-color: transparent;
   opacity: 0.9;
 }

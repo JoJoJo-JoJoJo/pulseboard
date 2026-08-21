@@ -110,5 +110,5 @@ export function togglePin({ updateId, pinned }, token) {
     method: "PATCH",
     body: { pinned },
     token,
-  })
+  });
 }

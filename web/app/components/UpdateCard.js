@@ -153,8 +153,10 @@ export default function UpdateCard({ update, auth, onUpdated, onDeleted }) {
     setError(null);
 
     try {
-
-      const { update: updated } = await togglePin({ updateId: update._id, pinned: !update.pinned }, auth.token);
+      const { update: updated } = await togglePin(
+        { updateId: update._id, pinned: !update.pinned },
+        auth.token,
+      );
 
       if (!updated) {
         setError("Failed to pin the update. Please try again.");
@@ -164,7 +166,6 @@ export default function UpdateCard({ update, auth, onUpdated, onDeleted }) {
     } catch (err) {
       setError(err.message);
     }
-
   }
 
   async function handleDelete() {

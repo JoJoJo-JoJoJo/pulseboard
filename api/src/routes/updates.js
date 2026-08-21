@@ -387,25 +387,26 @@ router.patch("/:id/pin", requireAuth, checkRole("LEAD"), async (req, res) => {
     const { pinned } = req.body;
     const update = await Update.findById(req.params.id);
 
-    if (!update)
-      return res.status(404).json({ error: "Update not found" });
+    if (!update) return res.status(404).json({ error: "Update not found" });
 
     update.pinned = pinned;
     await update.save();
 
-    const populated = await update
-      .populate("author", "displayName email");
+    const populated = await update.populate("author", "displayName email");
 
     return res.status(200).json({ update: populated });
-
   } catch (err) {
     return res.status(400).json({ error: "Invalid update id" });
   }
 });
 
-router.delete("/:id", requireAuth, checkRole("LEAD", "MEMBER"), async (req, res) => {
-  try {
-    const update = await Update.findById(req.params.id);
+router.delete(
+  "/:id",
+  requireAuth,
+  checkRole("LEAD", "MEMBER"),
+  async (req, res) => {
+    try {
+      const update = await Update.findById(req.params.id);
 
       if (!update) {
         return res.status(404).json({ error: "Update not found" });
