@@ -17,6 +17,7 @@ export default function Feed({ auth, refreshToken, socket }) {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -198,6 +199,42 @@ export default function Feed({ auth, refreshToken, socket }) {
     );
   }
 
+  function getCurrentFilters() {
+    const filters = {
+      status: statusFilter || undefined,
+      author: authorFilter || undefined,
+      sort: sortOrder,
+    };
+
+    if (tagFilter) {
+      filters.tag = tagFilter;
+    }
+
+    return filters;
+  }
+
+  async function handleRefresh() {
+    if (refreshing) {
+      return;
+    }
+
+    setRefreshing(true);
+    setError(null);
+
+    try {
+      const { updates: fetched = [], pagination } =
+        await listUpdates(getCurrentFilters());
+
+      setUpdates(fetched);
+      setPage(1);
+      setHasNextPage(pagination?.hasNextPage ?? false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   function handleUpdated(updated) {
     setUpdates((prev) =>
       prev.map((update) => (update._id === updated._id ? updated : update)),
@@ -298,6 +335,10 @@ export default function Feed({ auth, refreshToken, socket }) {
           <option value="oldest">Oldest first</option>
           <option value="most-reactions">Most reactions</option>
         </select>
+
+        <button type="button" onClick={handleRefresh} disabled={refreshing}>
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
       {error && <p className="error">{error}</p>}

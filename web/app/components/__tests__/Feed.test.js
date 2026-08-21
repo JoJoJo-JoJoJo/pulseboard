@@ -7,8 +7,8 @@ jest.mock("@/lib/api", () => ({
 }));
 
 jest.mock("../UpdateCard", () => {
-  return function MockUpdateCard() {
-    return <div>Mock Update Card</div>;
+  return function MockUpdateCard({ update }) {
+    return <div>{update.text}</div>;
   };
 });
 
@@ -219,6 +219,150 @@ describe("Feed - handleShowMyUpdates", () => {
     expect(
       screen.getByRole("option", { name: "Priya Sharma" }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Feed - manual refresh", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("refreshes the feed using the currently selected filters and sort", async () => {
+    const existingUpdates = [
+      {
+        _id: "update-1",
+        text: "Existing update",
+        status: "done",
+        author: {
+          _id: "u1",
+          displayName: "Diego Fernandez",
+        },
+      },
+    ];
+
+    listUpdates.mockImplementation(({ status } = {}) => {
+      if (status === "blocked") {
+        return Promise.resolve({
+          updates: [],
+          pagination: {
+            hasNextPage: false,
+          },
+        });
+      }
+
+      return Promise.resolve({
+        updates: existingUpdates,
+        pagination: {
+          hasNextPage: false,
+        },
+      });
+    });
+
+    render(<Feed auth={null} refreshToken={0} />);
+
+    await screen.findByText("Existing update");
+
+    // Select status filter.
+    const statusSelect = screen.getAllByRole("combobox")[0];
+
+    fireEvent.change(statusSelect, {
+      target: { value: "blocked" },
+    });
+
+    // Select sort order.
+    const sortSelect = screen.getAllByRole("combobox")[3];
+
+    fireEvent.change(sortSelect, {
+      target: { value: "oldest" },
+    });
+
+    await waitFor(() => {
+      expect(listUpdates).toHaveBeenLastCalledWith({
+        status: "blocked",
+        author: undefined,
+        sort: "oldest",
+      });
+    });
+
+    // Click Refresh.
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+
+    // Verify Refresh uses the same selected filter and sort.
+    await waitFor(() => {
+      expect(listUpdates).toHaveBeenLastCalledWith({
+        status: "blocked",
+        author: undefined,
+        sort: "oldest",
+      });
+    });
+
+    // Verify selected values are still preserved.
+    expect(statusSelect).toHaveValue("blocked");
+    expect(sortSelect).toHaveValue("oldest");
+  });
+
+  it("keeps existing updates visible while refreshing", async () => {
+    let resolveRefresh;
+    let callCount = 0;
+
+    listUpdates.mockImplementation(() => {
+      callCount += 1;
+
+      // Initial feed requests.
+      if (callCount <= 2) {
+        return Promise.resolve({
+          updates: [
+            {
+              _id: "update-1",
+              text: "Existing update",
+            },
+          ],
+          pagination: {
+            hasNextPage: false,
+          },
+        });
+      }
+
+      // Manual refresh request.
+      return new Promise((resolve) => {
+        resolveRefresh = resolve;
+      });
+    });
+
+    render(<Feed auth={null} refreshToken={0} />);
+
+    // Wait for initial update.
+    expect(await screen.findByText("Existing update")).toBeInTheDocument();
+
+    // Click Refresh.
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+
+    // Refresh feedback should appear.
+    expect(
+      screen.getByRole("button", { name: "Refreshing..." }),
+    ).toBeDisabled();
+
+    // Old update must remain visible during refresh.
+    expect(screen.getByText("Existing update")).toBeInTheDocument();
+
+    // Complete the manual refresh.
+    resolveRefresh({
+      updates: [
+        {
+          _id: "update-2",
+          text: "Refreshed update",
+        },
+      ],
+      pagination: {
+        hasNextPage: false,
+      },
+    });
+
+    // New data should now appear.
+    expect(await screen.findByText("Refreshed update")).toBeInTheDocument();
+
+    // Button should return to normal.
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
   });
 });
 

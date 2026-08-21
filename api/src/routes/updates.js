@@ -87,6 +87,7 @@ router.get("/", optionalAuth, async (req, res) => {
         },
         {
           $sort: {
+            pinned: -1,
             reactionCount: -1,
             createdAt: -1,
           },
@@ -101,7 +102,7 @@ router.get("/", optionalAuth, async (req, res) => {
       ]);
     } else {
       updates = await Update.find(filter)
-        .sort({ createdAt: sortDirection })
+        .sort({ pinned: -1, createdAt: sortDirection })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate("author", "displayName email")

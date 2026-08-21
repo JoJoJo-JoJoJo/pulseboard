@@ -45,6 +45,20 @@ export function login({ email, password }) {
   });
 }
 
+export function forgotPassword({ email }) {
+  return request("/api/auth/forgot-password", {
+    method: "POST",
+    body: { email },
+  });
+}
+
+export function resetPassword({ token, newPassword }) {
+  return request("/api/auth/reset-password", {
+    method: "POST",
+    body: { token, newPassword },
+  });
+}
+
 export function listUpdates({
   author,
   status,
@@ -65,6 +79,10 @@ export function listUpdates({
   const query = params.toString() ? `?${params.toString()}` : "";
 
   return request(`/api/updates${query}`);
+}
+
+export function getUpdateById(id, token) {
+  return request(`/api/updates/${id}`, { token });
 }
 
 export function createUpdate({ text, status, tags }, token) {
